@@ -1,57 +1,80 @@
-# gulp-jsoncombine
-[![NPM version][npm-image]][npm-url] [![Build Status][travis-image]][travis-url]  [![Coverage Status][coveralls-image]][coveralls-url] [![Dependency Status][depstat-image]][depstat-url]
+# gulp-tl-combine
 
-> jsoncombine plugin for [gulp](https://github.com/wearefractal/gulp)
+> TurnsLift plugin for [gulp](https://github.com/wearefractal/gulp).
+
+The purpose of this gulp plugin is to combine data definition files used in the TurnsLift platform into a standard
+ JSON representation.  This representation is the format expected by the TurnsLift platform to merge and upgrade schemas,
+ queries and views for data access.
 
 ## Usage
 
-First, install `gulp-jsoncombine` as a development dependency:
+First, install `gulp-tl-combine` as a development dependency:
 
 ```shell
-npm install --save-dev gulp-jsoncombine
+npm install --save-dev gulp-tl-combine
 ```
 
 Then, add it to your `gulpfile.js`:
 
-** This plugin will collect all the json files provided to it, parse them, put them in a dictionary where the keys of that dictionary are the filenames (sans the '.json' postfix) and pass that to a processor function. That function decides how that output should look in the resulting file. **
-
 ```javascript
-var jsoncombine = require("gulp-jsoncombine");
+var tlcombine = require("gulp-tl-combine");
 
 gulp.src("./src/*.json")
-	.pipe(jsoncombine("result.js",function(data){...}))
+	.pipe(tlcombine("output_file_name.json"))
 	.pipe(gulp.dest("./dist"));
+```
+
+Create the following directory structure in your application.  Files placed into these directories will be processed
+by this plugin into the desired output file.
+
+```
+|- data
+  |- entities
+  | |- (json schema files)...
+  |- entity-patches
+  | |- (entity-patch files)...
+  |- indexes
+  | |- (N1QL index statements in files that end with *.n1ql extension)
+  |- queries
+  | |- (N1QL query statements in files that end with *.n1ql extension)
+  |- views
+  | |- (json design documents containing view definitions)
 ```
 
 ## API
 
-### jsoncombine(fileName, processor)
+### jsoncombine(fileName, options)
 
 #### fileName
 Type: `String`  
 
 The output filename
 
-#### processor
-Type: `Function`  
+#### options.dataConverter(data)
+Type: `Function`
 
-The function that will be called with the dictionary containing all the data from the processes JSON files, where the keys of the dictionary, would be the names of the files (sans the '.json' postfix).
+This function acts as a reducer function.  All of the collected data is passed into this function as the data object when
+the stream is closed.  The keys of the data object will be the names of the files (sans the '.json' postfix).
 
 The function should return a new `Buffer` that would be writter to the output file.
+
+#### options.pathConverter(file)
+Type: `Function`
+
+file is just [vinyl](https://github.com/gulpjs/vinyl)
+
+This function can be used to transform physical file names into some other key.  This function should return a `String` that
+will become the key of the data object passed to `dataConverter`.
+
+#### options.fileParser(file)
+Type: `Function`
+
+file is just [vinyl](https://github.com/gulpjs/vinyl)
+
+This function is responsible for reading a given file and returning proper JSON that can be used as the value assigned
+to the data object send to `dataConverter`.
 
 
 ## License
 
-[MIT License](http://en.wikipedia.org/wiki/MIT_License)
-
-[npm-url]: https://npmjs.org/package/gulp-jsoncombine
-[npm-image]: https://badge.fury.io/js/gulp-jsoncombine.png
-
-[travis-url]: http://travis-ci.org/reflog/gulp-jsoncombine
-[travis-image]: https://secure.travis-ci.org/reflog/gulp-jsoncombine.png?branch=master
-
-[coveralls-url]: https://coveralls.io/r/reflog/gulp-jsoncombine
-[coveralls-image]: https://coveralls.io/repos/reflog/gulp-jsoncombine/badge.png
-
-[depstat-url]: https://david-dm.org/reflog/gulp-jsoncombine
-[depstat-image]: https://david-dm.org/reflog/gulp-jsoncombine.png
+See LICENSE file for details.

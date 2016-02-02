@@ -1,105 +1,130 @@
-"use strict";
-var through = require('through');
-var path = require('path');
-var gutil = require('gulp-util');
-var merge = require('merge');
-var PluginError = gutil.PluginError;
-var File = gutil.File;
+const PLUGIN_NAME = 'gulp-tl-combine',
+    through = require('through'),
+    path = require('path'),
+    gutil = require('gulp-util'),
+    _ = require('lodash'),
+    PluginError = _.curry(gutil.PluginError)(PLUGIN_NAME),
+    File = gutil.File;
 
-module.exports = function (fileName, converter) {
-  var config;
-  var defaults = {
-    dataConverter: dataConverter,
-    pathConverter: pathConverter,
-    fileConverter: fileConverter
-  };
+function fileParser(file) {
+    const fileExtname = path.extname(file.relative);
 
-  function dataConverter(data) {
-    return new Buffer(JSON.stringify(data, null, '\t'));
-  }
+    if (fileExtname === '.n1ql') {
+        let r = {};
 
-  function pathConverter(file) {
-    return file.relative.substr(0,file.relative.length-5);
-  }
+        r[`$${path.basename(file.relative, path.extname(file.relative))}`] = file.contents.toString();
 
-  function fileConverter(file) {
-    return JSON.parse(file.contents.toString());
-  }
-
-  var data = {};
-  var firstFile = null;
-  //We keep track of when we should skip the conversion for error cases
-  var skipConversion = false;
-
-  if (!fileName) {
-    throw new PluginError('gulp-jsoncombine', 'Missing fileName option for gulp-jsoncombine');
-  }
-
-  if(typeof converter === 'object') {
-    config = merge.recursive(defaults, converter);
-  } else {
-    config = defaults;
-
-    if(typeof converter === 'function') {
-      config.dataConverter = converter;
+        return r;
+    } else {
+        // Assume this is a JSON file
+        return JSON.parse(file.contents.toString());
     }
-  }
+}
 
-  if (!config.hasOwnProperty('dataConverter') && typeof config.dataConverter !== 'function') {
-    throw new PluginError('gulp-jsoncombine', 'Missing data converter option for gulp-jsoncombine');
-  }
+function dataConverter(data) {
+    const output = {
+        entities: [],
+        patches: [],
+        views: [],
+        queries: [],
+        indexes: []
+    };
 
-  if (!config.hasOwnProperty('pathConverter') && typeof config.pathConverter !== 'function') {
-    throw new PluginError('gulp-jsoncombine', 'Missing path converter option for gulp-jsoncombine');
-  }
+    Object.keys(data).forEach((key)=> {
+        const entry = {
+            file: key,
+            content: data[key]
+        };
 
-  if (!config.hasOwnProperty('fileConverter') && typeof config.fileConverter !== 'function') {
-    throw new PluginError('gulp-jsoncombine', 'Missing file converter option for gulp-jsoncombine');
-  }
+        if (key.indexOf(`${path.sep}views${path.sep}`) > -1) {
+            output.views.push(entry);
+        }
 
-  function bufferContents(file) {
-    if (!firstFile) {
-      firstFile = file;
-    }
+        if (key.indexOf(`${path.sep}entity-patches${path.sep}`) > -1) {
+            output.patches.push(entry);
+        }
 
-    if (file.isNull()) {
-      return; // ignore
-    }
+        if (key.indexOf(`${path.sep}entities${path.sep}`) > -1) {
+            output.entities.push(entry);
+        }
 
-    if (file.isStream()) {
-      skipConversion = true;
-      return this.emit('error', new PluginError('gulp-jsoncombine', 'Streaming not supported'));
-    }
+        if (key.indexOf(`${path.sep}queries${path.sep}`) > -1) {
+            output.queries.push(entry);
+        }
 
-    try {
-      data[config.pathConverter(file)] = config.fileConverter(file);
-    } catch (err) {
-      skipConversion = true;
-      return this.emit('error',
-        new PluginError('gulp-jsoncombine', 'Error parsing JSON: ' + err + ', file: ' + file.path.slice(file.base.length)));
-    }
-  }
+        if (key.indexOf(`${path.sep}indexes${path.sep}`) > -1) {
+            output.indexes.push(entry);
+        }
+    });
 
-  function endStream() {
-    if (firstFile && !skipConversion) {
-      var joinedPath = path.join(firstFile.base, fileName);
+    return new Buffer(JSON.stringify(output, null, 4));
+}
 
-      try {
-        var joinedFile = new File({
-          cwd: firstFile.cwd,
-          base: firstFile.base,
-          path: joinedPath,
-          contents: config.dataConverter(data)
-        });
+module.exports = (fileName, options)=> {
+    const defaults = {
+        dataConverter,
+        pathConverter: (file)=> {
+            return path.dirname(file.relative) + path.sep + path.basename(file.relative, path.extname(file.relative));
+        },
+        fileParser
+    };
 
-        this.emit('data', joinedFile);
-      } catch (e) {
-        return this.emit('error', new PluginError('gulp-jsoncombine', e, { showStack: true }));
-      }
+    var config,
+        data = {},
+        firstFile = null,
+        skipConversion = false; // We keep track of when we should skip the conversion for error cases
+
+    if (!fileName) {
+        throw new PluginError('Missing fileName option.');
     }
 
-    this.emit('end');
-  }
+    config = _.defaults({}, options, defaults);
 
-  return through(bufferContents, endStream);
+    function bufferContents(file) {
+        if (!firstFile) {
+            firstFile = file;
+        }
+
+        if (file.isNull()) {
+            return; // ignore
+        }
+
+        if (file.isStream()) {
+            skipConversion = true;
+
+            return this.emit('error', new PluginError('Streaming not supported', { showStack: false }));
+        }
+
+        try {
+            data[config.pathConverter(file)] = config.fileParser(file);
+        } catch (err) {
+            skipConversion = true;
+
+            return this.emit('error',
+                new PluginError(`Error parsing JSON: ${err}, file: ${file.path.slice(file.base.length)}`, { showStack: false }));
+        }
+    }
+
+    function endStream() {
+        if (firstFile && !skipConversion) {
+            var joinedPath = path.join(firstFile.base, fileName);
+
+            try {
+                var joinedFile = new File({
+                    cwd: firstFile.cwd,
+                    base: firstFile.base,
+                    path: joinedPath,
+                    contents: config.dataConverter(data)
+                });
+
+                this.emit('data', joinedFile);
+            } catch (e) {
+                return this.emit('error', new PluginError(e, { showStack: true }));
+            }
+        }
+
+        this.emit('end');
+    }
+
+    return through(bufferContents, endStream);
 };
