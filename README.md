@@ -1,3 +1,5 @@
+[![npm version](https://badge.fury.io/js/gulp-tl-combine.svg)](https://badge.fury.io/js/gulp-tl-combine)
+
 # gulp-tl-combine
 
 > TurnsLift plugin for [gulp](https://github.com/wearefractal/gulp).
