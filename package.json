@@ -1,34 +1,34 @@
 {
-    "name": "gulp-tl-combine",
-    "version": "1.0.1",
-    "description": "A plugin for Gulp to combine data definition files for TurnsLift addons.",
-    "keywords": [
-        "gulpplugin"
-    ],
-    "main": "dist/index.js",
-    "bugs": {
-        "url": "https://github.com/avishnyak/gulp-tl-combine/issues"
-    },
-    "repository": "avishnyak/gulp-tl-combine",
-    "dependencies": {
-        "gulp-util": "^2.2.0",
-        "lodash": "^4.1.0",
-        "through": "^2.3.8"
-    },
-    "devDependencies": {
-        "babel-preset-es2015": "^6.3.13",
-        "event-stream": "*",
-        "gulp": "^3.9.0",
-        "gulp-babel": "^6.1.2",
-        "gulp-jscs": "^3.0.2",
-        "gulp-load-plugins": "^1.2.0",
-        "gulp-mocha": "^2.2.0",
-        "mocha": "^2.4.5",
-        "should": "^8.2.1"
-    },
-    "engines": {
-        "node": ">=0.12.0",
-        "npm": ">=2.0.0"
-    },
-    "license": "MIT"
+  "name": "gulp-tl-combine",
+  "version": "1.0.2",
+  "description": "A plugin for Gulp to combine data definition files for TurnsLift addons.",
+  "keywords": [
+    "gulpplugin"
+  ],
+  "main": "dist/index.js",
+  "bugs": {
+    "url": "https://github.com/avishnyak/gulp-tl-combine/issues"
+  },
+  "repository": "avishnyak/gulp-tl-combine",
+  "dependencies": {
+    "gulp-util": "^2.2.0",
+    "lodash": "^4.1.0",
+    "through": "^2.3.8"
+  },
+  "devDependencies": {
+    "babel-preset-es2015": "^6.3.13",
+    "event-stream": "*",
+    "gulp": "^3.9.0",
+    "gulp-babel": "^6.1.2",
+    "gulp-jscs": "^3.0.2",
+    "gulp-load-plugins": "^1.2.0",
+    "gulp-mocha": "^2.2.0",
+    "mocha": "^2.4.5",
+    "should": "^8.2.1"
+  },
+  "engines": {
+    "node": ">=0.12.0",
+    "npm": ">=2.0.0"
+  },
+  "license": "MIT"
 }
