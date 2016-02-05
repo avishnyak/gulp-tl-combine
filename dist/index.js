@@ -33,29 +33,25 @@ function dataConverter(data) {
     };
 
     Object.keys(data).forEach(function (key) {
+        gutil.log('Processing ' + key);
+
         var entry = {
             file: key,
             content: data[key]
         };
 
-        if (key.indexOf(path.sep + 'views' + path.sep) > -1) {
+        if (key.indexOf('views' + path.sep) > -1) {
             output.views.push(entry);
-        }
-
-        if (key.indexOf(path.sep + 'entity-patches' + path.sep) > -1) {
+        } else if (key.indexOf('entity-patches' + path.sep) > -1) {
             output.patches.push(entry);
-        }
-
-        if (key.indexOf(path.sep + 'entities' + path.sep) > -1) {
+        } else if (key.indexOf('entities' + path.sep) > -1) {
             output.entities.push(entry);
-        }
-
-        if (key.indexOf(path.sep + 'queries' + path.sep) > -1) {
+        } else if (key.indexOf('queries' + path.sep) > -1) {
             output.queries.push(entry);
-        }
-
-        if (key.indexOf(path.sep + 'indexes' + path.sep) > -1) {
+        } else if (key.indexOf('indexes' + path.sep) > -1) {
             output.indexes.push(entry);
+        } else {
+            gutil.log(key + ' is not a recognized data type. Skipping.');
         }
     });
 
