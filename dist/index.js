@@ -32,8 +32,6 @@ function dataConverter(data) {
     };
 
     Object.keys(data).forEach(function (key) {
-        gutil.log('Processing ' + key);
-
         var entry = {
             file: key,
             content: data[key]
