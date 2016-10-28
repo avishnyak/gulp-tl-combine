@@ -17,6 +17,5 @@
                 "$query": "SELECT\n    *\nFROM\n    system:indexes\nSKIP 0\nLIMIT 100\n"
             }
         }
-    ],
-    "indexes": []
+    ]
 }

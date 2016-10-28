@@ -9,7 +9,7 @@ const PLUGIN_NAME = 'gulp-tl-combine',
 function fileParser(file) {
     const fileExtname = path.extname(file.relative);
 
-    if (fileExtname === '.n1ql') {
+    if (fileExtname === '.sql') {
         let r = {};
 
         r[`$${path.basename(file.relative, path.extname(file.relative))}`] = file.contents.toString();
@@ -26,8 +26,7 @@ function dataConverter(data) {
         entities: [],
         patches: [],
         views: [],
-        queries: [],
-        indexes: []
+        queries: []
     };
 
     Object.keys(data).forEach((key)=> {
@@ -44,8 +43,6 @@ function dataConverter(data) {
             output.entities.push(entry);
         } else if (key.indexOf(`queries${path.sep}`) > -1) {
             output.queries.push(entry);
-        } else if (key.indexOf(`indexes${path.sep}`) > -1) {
-            output.indexes.push(entry);
         } else {
             gutil.log(`${key} is not a recognized data type. Skipping.`);
         }
