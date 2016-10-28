@@ -1,6 +1,6 @@
 {
   "name": "gulp-tl-combine",
-  "version": "1.0.3",
+  "version": "2.0.0",
   "description": "A plugin for Gulp to combine data definition files for TurnsLift addons.",
   "keywords": [
     "gulpplugin"
