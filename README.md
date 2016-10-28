@@ -35,10 +35,8 @@ by this plugin into the desired output file.
   | |- (json schema files)...
   |- entity-patches
   | |- (entity-patch files)...
-  |- indexes
-  | |- (N1QL index statements in files that end with *.n1ql extension)
   |- queries
-  | |- (N1QL query statements in files that end with *.n1ql extension)
+  | |- (SQL query statements in files that end with *.sql extension)
   |- views
   | |- (json design documents containing view definitions)
 ```

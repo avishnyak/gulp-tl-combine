@@ -21,10 +21,10 @@ describe("gulp-tl-combine", ()=> {
         }),
         sourceFiles = [
             new gutil.File({
-                path: "test/fixtures/queries/query.n1ql",
+                path: "test/fixtures/queries/query.sql",
                 cwd: "test/",
                 base: "test",
-                contents: fs.readFileSync("test/fixtures/queries/query.n1ql")
+                contents: fs.readFileSync("test/fixtures/queries/query.sql")
             }),
             new gutil.File({
                 path: "test/fixtures/entities/case.json",
@@ -53,10 +53,10 @@ describe("gulp-tl-combine", ()=> {
 
     it("should error on stream", function (done) {
         var srcFile = new gutil.File({
-            path: "test/fixtures/queries/query.n1ql",
+            path: "test/fixtures/queries/query.sql",
             cwd: "test/",
             base: "test/fixtures",
-            contents: fs.createReadStream("test/fixtures/queries/query.n1ql")
+            contents: fs.createReadStream("test/fixtures/queries/query.sql")
         });
 
         var stream = tlcombine("output.json");
